@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import provincialDataJson from "./data/provincial_data.json"; // Make sure this path is correct
 
 const DevelopmentForm = () => {
   // State for form inputs and selections
@@ -10,6 +11,9 @@ const DevelopmentForm = () => {
   const [subCategory, setSubCategory] = useState("");
   const [subSubCategory, setSubSubCategory] = useState("");
   const [subSubSubCategory, setSubSubSubCategory] = useState(""); // For 4th level nesting
+  const [districts, setDistricts] = useState([]);
+  const [dsDivisions, setDsDivisions] = useState([]);
+  const [gnDivisions, setGnDivisions] = useState([]);
 
   // State for dynamic content
   const [problems, setProblems] = useState({});
@@ -18,433 +22,48 @@ const DevelopmentForm = () => {
     { proposal: "", cost: "", agency: "" },
   ]);
 
-  // Data from the attached document for District and Divisional Secretariat Divisions
-  const districtsAndDivisions = {
-    කොළඹ: {
-      "කොළඹ": [],
-      "කොලොන්නාව": [],
-      "කඩුවෙල": {
-        "ග්‍රාම නිලධාරී කොට්ඨාශය": {
-          "469": "රනාල",
-          "470": "නවගමුව",
-          "470 A": "නවගමුව දකුණ",
-          "471": "ඉහළ බෝමිරිය",
-          "471A": "වෑකේවත්ත",
-          "472/A": "පහළ බෝමිරිය",
-          "472/B": "පහළ බෝමිරිය",
-          "473": "කොතලාවල",
-          "473/A": "කඩුවෙල",
-          "474": "හේවාගම",
-          "474A": "රග්ගහවත්ත",
-          "475": "වැලිවිට",
-          "475/A": "මහදෙනිය",
-          "476": "මාලබේ නැගෙනහිර",
-          "476A": "මාලබේ බටහිර",
-          "476B": "මාලබේ උතුර",
-          "477/A": "තලංගම උතුර",
-          "477/B": "තලංගම දකුණ",
-          "477B": "මුත්තෙට්ටුගොඩ",
-          "477C": "පොතුඅරාව",
-          "478": "තලාහේන",
-          "478A": "තලාහේන දකුණ",
-          "479": "ජයවඩනගම",
-          "479/A": "පහළවෙල",
-          "479B": "ආසිරි උයන",
-          "479C": "වික්‍රමසිංහපුර",
-          "479D": "කුමාරගේවත්ත",
-          "479E": "බටපොත",
-          "479/F": "අරුප්පිටිය",
-          "480": "වැලිපිල්ලෑව",
-          "480/A": "දැඩිගමුව",
-          "480B": "ඇඹිල්ලදෙනිය",
-          "480/C": "බටවෙල",
-          "487": "ඔරුවල",
-          "487/A": "ශාන්තාලෝකගම",
-          "488": "කොරතොට",
-          "488/A": "වැලිහිද",
-          "488/B": "තුන්අදහේන",
-          "489": "පෝරේ",
-          "489A": "බොරලුගොඩ",
-          "490": "අතුරුගිරිය",
-          "490/A": "අතුරුගිරිය දකුණ",
-          "490/B": "තල්දියාවල",
-          "491": "කලපලුවාවල",
-          "491A": "වල්පොල",
-          "491 B": "කොටුවේගොඩ",
-          "492": "සුභූතිපුර",
-          "492/A": "බත්තරමුල්ල දකුණ",
-          "492/B": "බත්තරමුල්ල උතුර",
-          "492/C": "උඩුමුල්ල",
-          "492/D": "රජමල්වත්ත",
-          "494": "හෝකන්දර උතුර",
-          "494 A": "හෝකන්දර නැගෙනහිර",
-          "494B": "අරන්ගල",
-          "494C": "හෝකන්දර දකුණ",
-          "495": "වැල්ලන්ගිරිය",
-          "495A": "ඇවරිහේන"
-        }
-      },
-      "හෝමාගම": [],
-      "සීතාවක (හංවැල්ල)": [],
-      "පාදුක්ක": [],
-      "මහරගම": [],
-      "ශ්‍රී ජයවර්ධනපුර කෝට්ටේ": [],
-      "තිඹිරිගස්යාය": [],
-      "දෙහිවල": [],
-      "රත්මලාන": [],
-      "මොරටුව": [],
-      "කැස්බෑව": [],
-    },
-    ගම්පහ: {
-      "නිකවැරටිය": [],
-      "කටාන": [],
-      "දිවුලපිටිය": [],
-      "මීරිගම": [],
-      "මිනුවන්ගොඩ": [],
-      "වත්තල": [],
-      "ජා-ඇල": [],
-      "ගම්පහ": [],
-      "අත්තනගල්ල": [],
-      "දොම්පේ": [],
-      "මහර": [],
-      "කැළණිය": [],
-      "බියගම": [],
-    },
-    කළුතර: {
-      "පානදුර": [],
-      "බණ්ඩාරගම": [],
-      "හොරණ": [],
-      "ඉංගිරිය": [],
-      "බුලත්සිංහල": [],
-      "මදුරාවල": [],
-      "මිල්ලනිය": [],
-      "කළුතර": [],
-      "බේරුවල": [],
-      "දොඩන්ගොඩ": [],
-      "මතුගම": [],
-      "අගලවත්ත": [],
-      "පාලින්දනුවර": [],
-      "වලල්ලවිට": [],
-    },
-    මහනුවර: {
-      "පාතදුම්බර": [],
-      "ගඟවට කෝරළේ": [],
-      "මහනුවර හතර ග්‍රාවට්": [],
-      "හරිස්පත්තුව": [],
-      "පාතහේවාහැට": [],
-      "කුන්ඩසාලේ": [],
-      "අකුරන්": [],
-      "යටිනුවර": [],
-      "උඩුනුවර": [],
-      "දෙල්තොට": [],
-      "උඩදුම්බර": [],
-      "තුම්පනේ": [],
-      "පූජපිටිය": [],
-      "පන්විල": [],
-      "පස්බාගේ කෝරළේ": [],
-      "මැදදුම්බර": [],
-      "දොලව": [],
-      "ගඟ ඉහළ කෝරළේ": [],
-      "උඩපලාත": [],
-      "හතරලියද්ද": [],
-    },
-    මාතලේ: {
-      "දඹුල්ල": [],
-      "නාවුල": [],
-      "පල්ලේපොල": [],
-      "ගලේවෙල": [],
-      "මාතලේ": [],
-      "යටවත්ත": [],
-      "උකුවෙල": [],
-      "අම්බංගඟ කෝරළේ": [],
-      "ලග්ගල පල්ලේගම": [],
-      "විල්ගමුව": [],
-      "රත්තොට": [],
-      "පත්තන්න": [],
-    },
-    නුවරඑළිය: {
-      "කොත්මලේ": [],
-      "අම්බගමුව": [],
-      "හඟුරන්කෙත": [],
-      "නුවරඑළිය": [],
-      "වලපනේ": [],
-    },
-    ගාල්ල: {
-      "බෙන්තොට": [],
-      "බලපිටිය": [],
-      "අම්බලන්ගොඩ": [],
-      "කරන්දෙනිය": [],
-      "එල්පිටිය": [],
-      "තවලම": [],
-      "නාගොඩ": [],
-      "නියාගම": [],
-      "බෝපේ පොද්දල": [],
-      "ගාල්ල": [],
-      "අක්මීමන": [],
-      "බද්දේගම": [],
-      "යක්කලමුල්ල": [],
-      "වඳුරඹ": [],
-      "වැලිවිටිය දිවිතුර": [],
-      "ගෝනපිනුවල": [],
-      "හබරදුව": [],
-      "රාජ්ගම": [],
-    },
-    මාතර: {
-      "බදුල්තුඩුව": [],
-      "අකුරැස්ස": [],
-      "අතුරලිය": [],
-      "දෙවිනුවර": [],
-      "දික්වැල්ල": [],
-      "හක්මන": [],
-      "කඹුරුපිටිය": [],
-      "කිරින්ද": [],
-      "කොටපොල": [],
-      "මලිම්බඩ": [],
-      "මාතර": [],
-      "මුලටියන": [],
-      "පස්ගොඩ": [],
-      "පිටබැද්දර": [],
-      "තිහගොඩ": [],
-      "වැලිගම": [],
-    },
-    හම්බන්තොට: {
-      "අම්බලන්තොට": [],
-      "අඟුණකොලපැලැස්ස": [],
-      "හම්බන්තොට": [],
-      "ලුණුගම්වෙහෙර": [],
-      "සූරියවැව": [],
-      "තනමල්විල": [],
-      "තිස්සමහාරාමය": [],
-      "වලස්මුල්ල": [],
-      "කටුවන": [],
-      "බෙලිඅත්ත": [],
-      "වීරකැටිය": [],
-    },
-    යාපනය: {
-      "කරෙයිනගර්": [],
-      "කයිට්ස්": [],
-      "ඩෙල්ෆ්ට්": [],
-      "වේලනායි": [],
-      "වඩුක්කොඩ්ඩායි": [],
-      "යාපනය": [],
-      "නල්ලූර්": [],
-      "තෙන්මරච්චි": [],
-      "චාවකච්චේරි": [],
-      "සන්දිලිපායි": [],
-      "උඩුවිල්": [],
-      "කෝපායි": [],
-      "වලිකාමම් නැගෙනහිර": [],
-      "මරුතන්කෙර්නි": [],
-      "පච්චිලපල්ලි": [],
-      "වඩමරච්චි නැගෙනහිර": [],
-      "පොයින්ට් පේද්‍රෝ": [],
-      "චංකනායි": [],
-      
-    },
-    කිලිනොච්චි: {
-      "පූනකරි": [],
-      "කරච්චි": [],
-      "කන්දවලායි": [],
-      "පූනරින්": [],
-    },
-    මන්නාරම: {
-      "මධු": [],
-      "මුසලි": [],
-      "මන්තායි බටහිර": [],
-      "නානාත්තන්": [],
-      "මන්නාරම": [],
-    },
-    වවුනියා: {
-      "වවුනියා": [],
-      "වවුනියා උතුර": [],
-      "වවුනියා දකුණ": [],
-      
-    },
-    මුලතිව්: {
-      "මන්තායි නැගෙනහිර": [],
-      "ඔද්දුසුද්දාන්": [],
-      "පුතුක්කුඩිඉරුප්පු": [],
-      "තුනුක්කායි": [],
-      "මැරිටයිම්පත්තු": [],
-      "මන්තායි බටහිර": [],
-    },
-    අම්පාර: {
-      "අම්පාර": [],
-      "ලාහුගල": [],
-      "උහන": [],
-      "සමන්තුරේ": [],
-      "කල්මුනායි දමිළ": [],
-      "නින්තවූර්": [],
-      "කරතිවු": [],
-      "නල්ලතන්නිය": [],
-      "අඩ්ඩාලච්චේනායි": [],
-      "ඔලුවිල්": [],
-      "අක්කරපත්තු": [],
-      "පදියතලාව": [],
-      "මහඔය": [],
-      "දමන": [],
-      "දෙහිඅත්තකන්දිය": [],
-      "එරාගම": [],
-      "පොත්තුවිල්": [],
-      "සාන්තමරුතු": [],
-      "නවිතන්වේලි": [],
-      "තිරුක්කෝවිල්": [],
-      "අකුරන්": [],
-      "පුදාව": [],
-    },
-    මඩකලපුව: {
-      "මන්මුනායි උතුර": [],
-      "මන්මුනායි දකුණ සහ එරුවිල් පත්තු": [],
-      "මන්මුනායි බටහිර": [],
-      "මන්මුනායි පත්තු": [],
-      "කෝරළේ පත්තු දකුණ": [],
-      "එරාවුර් පත්තු": [],
-      "කෝරළේ පත්තු": [],
-      "පොරතිවු පත්තු": [],
-      "කාත්තන්කුඩි": [],
-      "වලච්චේනායි": [],
-      "චෙන්කලඩි": [],
-      "වාකරායි": [],
-    },
-    ත්‍රිකුණාමලය: {
-      "ත්‍රිකුණාමලය නගරය සහ ග්‍රාවට්": [],
-      "කුච්චවේලි": [],
-      "ගෝමරන්කඩවල": [],
-      "කන්තලේ": [],
-      "තම්බලගමුව": [],
-      "කින්නියා": [],
-      "මුත්තුර්": [],
-      "සම්පුර්": [],
-      "සේරුවිල": [],
-      "මොරවැව": [],
-      "පදවි ශ්‍රී පුර": [],
-    },
-    කුරුණෑගල: {
-      "කුරුණෑගල": [],
-      "මාවතාගම": [],
-      "පොල්ගහවෙල": [],
-      "අලව්ව": [],
-      "වීරම්බුගෙදර": [],
-      "ඉබ්බාගමුව": [],
-      "ගිරිඋල්ල": [],
-      "පොල්පිතිගම": [],
-      "නාරම්මල": [],
-      "කටුපිටිය": [],
-      "පාඩුවස්නුවර": [],
-      "උඩුබද්දව": [],
-      "කොබෙයිගනේ": [],
-      "නිකවැරටිය": [],
-      "බිංගිරිය": [],
-      "කුලියාපිටිය": [],
-      "වාරියපොල": [],
-      "පන්නල": [],
-      "අගලවත්ත": [],
-      "මහෝ": [],
-      "ඒහෙතුවැව": [],
-      "දොඩංගස්ලන්ද": [],
-      "ගල්ගමුව": [],
-      "දඹදෙනිය": [],
-      "පොතුහැර": [],
-      "කටුපිටිය උතුර": [],
-      "උඩුබද්දව නැගෙනහිර": [],
-    },
-    පුත්තලම: {
-      "පුත්තලම": [],
-      "කල්පිටිය": [],
-      "දංකොටුව": [],
-      "චිලාව": [],
-      "වෙන්නප්පුව": [],
-      "අරච්චිකට්ටුව": [],
-      "අනමඩුව": [],
-      "පල්ලම": [],
-      "කරවිට": [],
-      "නාත්තන්ඩිය": [],
-      "මුන්දලම": [],
-      "වනාතවිල්ලුව": [],
-    },
-    අනුරාධපුර: {
-      "තලාව": [],
-      "ගල්නෑව": [],
-      "පලාගල": [],
-      "පොලොන්නරුව": [],
-      "හිඟුරක්ගොඩ": [],
-      "මැදිරිගිරිය": [],
-      "ලංකාපුර": [],
-      "වැලිකන්ද": [],
-      "දිඹුලාගල": [],
-      "තමන්කඩුව": [],
-      "එලහැර": [],
-    },
-    පොලොන්නරුව: {
-      "හිඟුරක්ගොඩ": [],
-      "මැදිරිගිරිය": [],
-      "ලංකාපුර": [],
-      "වැලිකන්ද": [],
-      "දිඹුලාගල": [],
-      "තමන්කඩුව": [],
-      "එලහැර": [],
-    },
-    බදුල්ල: {
-      "මහියංගනය": [],
-      "රිදීමලියද්ද": [],
-      "මීගහකිවුල": [],
-      "කන්දකැටිය": [],
-      "සොරනාතොට": [],
-      "පස්සර": [],
-      "ලුණුගල": [],
-      "බදුල්ල": [],
-      "හාලි-එල": [],
-      "උව පරණගම": [],
-      "වැලිමඩ": [],
-      "බණ්ඩාරවෙල": [],
-      "එල්ල": [],
-      "හපුතලේ": [],
-      "හල්දුම්මුල්ල": [],
-    },
-    මොනරාගල: {
-      "බිබිලේ": [],
-      "මදුල්ල": [],
-      "මැදගම": [],
-      "සියඹලාන්ඩුව": [],
-      "මොනරාගල": [],
-      "බඩල්කුඹුර": [],
-      "වැල්ලවාය": [],
-      "බුත්තල": [],
-      "කතරගම": [],
-      "තනමල්විල": [],
-      "සෙවනගල": [],
-    },
-    රත්නපුර: {
-      "ඇහැලියගොඩ": [],
-      "කුරුවිට": [],
-      "කිරිඇල්ල": [],
-      "රත්නපුර": [],
-      "ඉඹුල්පේ": [],
-      "බලංගොඩ": [],
-      "ගොඩකවෙල": [],
-      "පැල්මඩුල්ල": [],
-      "නිවිතිගල": [],
-      "කලවාන": [],
-      "කොලොන්න": [],
-      "ඇඹිලිපිටිය": [],
-      "අයගම": [],
-      "ඕපනායක": [],
-      "වැලිගෙපොල": [],
-      "අතුරලිය": [],
-    },
-    කෑගල්ල: {
-      "රඹුක්කන": [],
-      "මාවනැල්ල": [],
-      "අරනායක": [],
-      "වරකාපොල": [],
-      "කෑගල්ල": [],
-      "ගලිගමුව": [],
-      "දැරණියගල": [],
-      "යටියන්තොට": [],
-      "රුවන්වැල්ල": [],
-      "දෙහිඕවිට": [],
-      "බුලත්කොහුපිටිය": [],
-    },
+  // load data when the component mounts
+  useEffect(() => {
+    const allDistricts = provincialDataJson[0]?.districts || [];
+    setDistricts(allDistricts);
+  }, []);
+
+  const handleDistrictChange = (e) => {
+    const selectedDistrictName = e.target.value;
+    setDistrict(selectedDistrictName);
+
+    // Reset lower-level selections
+    setDivisionalSec("");
+    setGnDivision("");
+    setDsDivisions([]);
+    setGnDivisions([]);
+
+    if (selectedDistrictName) {
+      const selectedDistrictData = districts.find(
+        (d) => d.district.trim() === selectedDistrictName
+      );
+      if (selectedDistrictData) {
+        setDsDivisions(selectedDistrictData.ds_divisions);
+      }
+    }
+  };
+
+  const handleDivisionalSecChange = (e) => {
+    const selectedDsName = e.target.value;
+    setDivisionalSec(selectedDsName);
+
+    // Reset GN division selection
+    setGnDivision("");
+    setGnDivisions([]);
+
+    if (selectedDsName) {
+      const selectedDsData = dsDivisions.find(
+        (ds) => ds.ds_division_name.trim() === selectedDsName
+      );
+      if (selectedDsData) {
+        setGnDivisions(selectedDsData.gn_divisions);
+      }
+    }
   };
 
   // The complete data structure for the form, based on all provided documents.
@@ -525,17 +144,20 @@ const DevelopmentForm = () => {
             },
             {
               id: "sanitationUpgradeNeeded",
-              label: "සනීපාරක්ෂක පහසුකම් වැඩි දියුණු කරගැනීමට අවශ්‍ය පවුල් සංඛ්‍යාව",
+              label:
+                "සනීපාරක්ෂක පහසුකම් වැඩි දියුණු කරගැනීමට අවශ්‍ය පවුල් සංඛ්‍යාව",
               type: "number",
             },
             {
               id: "usePublicToilets",
-              label: "දෛනික අවශ්‍යතා සඳහා පොදු වැසිකිළි භාවිතා කරන පවුල් සංඛ්‍යාව",
+              label:
+                "දෛනික අවශ්‍යතා සඳහා පොදු වැසිකිළි භාවිතා කරන පවුල් සංඛ්‍යාව",
               type: "number",
             },
             {
               id: "femaleSanitationIssues",
-              label: "කාන්තා සනීපාරක්ෂක පහසුකම් සපයා ගැනීමේ අපහසුතා ඇති පවුල් සංඛ්‍යාව",
+              label:
+                "කාන්තා සනීපාරක්ෂක පහසුකම් සපයා ගැනීමේ අපහසුතා ඇති පවුල් සංඛ්‍යාව",
               type: "number",
             },
             {
@@ -545,7 +167,8 @@ const DevelopmentForm = () => {
             },
             {
               id: "diarrheaCholeraCases",
-              label: "පසුගිය වසරේ පාචනය හෝ කොලරාව වැනි රෝගීන් වාර්තා වීම් සංඛ්‍යාව",
+              label:
+                "පසුගිය වසරේ පාචනය හෝ කොලරාව වැනි රෝගීන් වාර්තා වීම් සංඛ්‍යාව",
               type: "number",
             },
           ],
@@ -785,7 +408,8 @@ const DevelopmentForm = () => {
           },
           {
             id: "mobileInternetSatisfaction",
-            label: "ජංගම දුරකථන සඳහා අන්තර්ජාල පහසුකම් පිළිබඳව සැහීමකට පත්විය හැකි ද?",
+            label:
+              "ජංගම දුරකථන සඳහා අන්තර්ජාල පහසුකම් පිළිබඳව සැහීමකට පත්විය හැකි ද?",
             type: "select",
             options: ["ඉතා හොඳයි", "සාමාන්‍යයි", "දුර්වලයි"],
           },
@@ -875,8 +499,7 @@ const DevelopmentForm = () => {
             },
             {
               id: "potentialJackfruitGardens",
-              label:
-                "කොස් වගා කිරීමට සුදුසු කොස් වගාව නොමැති ගෙවතු සංඛ්‍යාව",
+              label: "කොස් වගා කිරීමට සුදුසු කොස් වගාව නොමැති ගෙවතු සංඛ්‍යාව",
               type: "number",
             },
           ],
@@ -1119,7 +742,8 @@ const DevelopmentForm = () => {
           },
           {
             id: "elephantHouseDamage",
-            label: "පසුගිය වර්ෂයේ වන අලින් විසින් පහර දී විනාශ වූ නිවාස සංඛ්‍යාව",
+            label:
+              "පසුගිය වර්ෂයේ වන අලින් විසින් පහර දී විනාශ වූ නිවාස සංඛ්‍යාව",
             type: "number",
           },
           {
@@ -1154,22 +778,26 @@ const DevelopmentForm = () => {
         problems: [
           {
             id: "elephantDeathsByHuman",
-            label: "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය වන අලින් සංඛ්‍යාව",
+            label:
+              "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය වන අලින් සංඛ්‍යාව",
             type: "number",
           },
           {
             id: "elephantInjuriesByHuman",
-            label: "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් තුවාල වූ වන අලි සංඛ්‍යාව",
+            label:
+              "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් තුවාල වූ වන අලි සංඛ්‍යාව",
             type: "number",
           },
           {
             id: "crocodileDeathsByHuman",
-            label: "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය කිඹුලන් සංඛ්‍යාව",
+            label:
+              "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය කිඹුලන් සංඛ්‍යාව",
             type: "number",
           },
           {
             id: "leopardDeathsByHuman",
-            label: "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය දිවියන් සංඛ්‍යාව",
+            label:
+              "පසුගිය වර්ෂයේ මිනිස් ක්‍රියාකාරකම් හේතුවෙන් මියගිය දිවියන් සංඛ්‍යාව",
             type: "number",
           },
           {
@@ -1226,7 +854,8 @@ const DevelopmentForm = () => {
           },
           {
             id: "illegalSubstances",
-            label: "නීතිවිරෝධී මත්ද්‍රව්‍ය සහ මත්පැන් නිෂ්පාදන/අලෙවි ස්ථාන පවති ද?",
+            label:
+              "නීතිවිරෝධී මත්ද්‍රව්‍ය සහ මත්පැන් නිෂ්පාදන/අලෙවි ස්ථාන පවති ද?",
             type: "yesno",
           },
           {
@@ -1292,9 +921,16 @@ const DevelopmentForm = () => {
   };
 
   // --- HELPER FUNCTIONS to get dropdown options ---
-  const getSubCategories = () => (sector ? Object.keys(sectors[sector] || {}) : []);
-  const getSubSubCategories = () => (sector && subCategory ? Object.keys(sectors[sector][subCategory] || {}) : []);
-  const getSubSubSubCategories = () => (sector && subCategory && subSubCategory ? Object.keys(sectors[sector][subCategory][subSubCategory] || {}) : []);
+  const getSubCategories = () =>
+    sector ? Object.keys(sectors[sector] || {}) : [];
+  const getSubSubCategories = () =>
+    sector && subCategory
+      ? Object.keys(sectors[sector][subCategory] || {})
+      : [];
+  const getSubSubSubCategories = () =>
+    sector && subCategory && subSubCategory
+      ? Object.keys(sectors[sector][subCategory][subSubCategory] || {})
+      : [];
 
   // --- DYNAMICALLY GET THE CURRENT SECTION a user is viewing ---
   const getFinalSection = () => {
@@ -1302,11 +938,11 @@ const DevelopmentForm = () => {
     try {
       const level1 = sectors[sector];
       const level2 = level1 ? level1[subCategory] : null;
-      if (!level2 || (level2.problems || level2.isTable)) return level2;
+      if (!level2 || level2.problems || level2.isTable) return level2;
 
       if (!subSubCategory) return null;
       const level3 = level2[subSubCategory];
-      if (!level3 || (level3.problems || level3.isTable)) return level3;
+      if (!level3 || level3.problems || level3.isTable) return level3;
 
       if (!subSubSubCategory) return null;
       const level4 = level3[subSubSubCategory];
@@ -1412,7 +1048,9 @@ const DevelopmentForm = () => {
                   <input
                     type="number"
                     value={problems[prob.id] || ""}
-                    onChange={(e) => handleProblemChange(prob.id, e.target.value)}
+                    onChange={(e) =>
+                      handleProblemChange(prob.id, e.target.value)
+                    }
                     className="form-control"
                   />{" "}
                 </div>
@@ -1424,11 +1062,14 @@ const DevelopmentForm = () => {
                   <label className="form-label">{prob.label}:</label>{" "}
                   <select
                     value={problems[prob.id] || ""}
-                    onChange={(e) => handleProblemChange(prob.id, e.target.value)}
+                    onChange={(e) =>
+                      handleProblemChange(prob.id, e.target.value)
+                    }
                     className="form-control"
                   >
                     {" "}
-                    <option value="">තෝරන්න</option> <option value="yes">ඔව්</option>{" "}
+                    <option value="">තෝරන්න</option>{" "}
+                    <option value="yes">ඔව්</option>{" "}
                     <option value="no">නැත</option>{" "}
                   </select>{" "}
                 </div>
@@ -1440,7 +1081,9 @@ const DevelopmentForm = () => {
                   <label className="form-label">{prob.label}:</label>{" "}
                   <select
                     value={problems[prob.id] || ""}
-                    onChange={(e) => handleProblemChange(prob.id, e.target.value)}
+                    onChange={(e) =>
+                      handleProblemChange(prob.id, e.target.value)
+                    }
                     className="form-control"
                   >
                     {" "}
@@ -1464,14 +1107,26 @@ const DevelopmentForm = () => {
                       type="text"
                       placeholder="විස්තරය"
                       value={problems[prob.id]?.text || ""}
-                      onChange={(e) => handleTextWithNumberChange(prob.id, "text", e.target.value)}
+                      onChange={(e) =>
+                        handleTextWithNumberChange(
+                          prob.id,
+                          "text",
+                          e.target.value
+                        )
+                      }
                       className="form-control"
                     />{" "}
                     <input
                       type="number"
                       placeholder="සංඛ්‍යාව"
                       value={problems[prob.id]?.number || ""}
-                      onChange={(e) => handleTextWithNumberChange(prob.id, "number", e.target.value)}
+                      onChange={(e) =>
+                        handleTextWithNumberChange(
+                          prob.id,
+                          "number",
+                          e.target.value
+                        )
+                      }
                       className="form-control"
                     />{" "}
                   </div>{" "}
@@ -1510,7 +1165,9 @@ const DevelopmentForm = () => {
                       <input
                         type="text"
                         value={row[col] || ""}
-                        onChange={(e) => handleTableChange(rowIndex, col, e.target.value)}
+                        onChange={(e) =>
+                          handleTableChange(rowIndex, col, e.target.value)
+                        }
                         className="table-input"
                       />{" "}
                     </td>
@@ -1520,7 +1177,11 @@ const DevelopmentForm = () => {
             </tbody>
           </table>
         </div>
-        <button type="button" onClick={addTableRow} className="btn btn-success btn-block">
+        <button
+          type="button"
+          onClick={addTableRow}
+          className="btn btn-success btn-block"
+        >
           නව පේළියක් එකතු කරන්න
         </button>
       </div>
@@ -1537,17 +1198,13 @@ const DevelopmentForm = () => {
           <label className="form-label">දිස්ත්‍රික්කය:</label>
           <select
             value={district}
-            onChange={(e) => {
-              setDistrict(e.target.value);
-              setDivisionalSec(""); // Reset divisionalSec when district changes
-              setGnDivision(""); // Reset gnDivision too
-            }}
+            onChange={handleDistrictChange}
             className="form-control"
           >
-            <option value="">තෝරන්න</option>
-            {Object.keys(districtsAndDivisions).map((d) => (
-              <option key={d} value={d}>
-                {d}
+            <option value="">-- දිස්ත්‍රික්කය තෝරන්න --</option>
+            {districts.map((d) => (
+              <option key={d.district.trim()} value={d.district.trim()}>
+                {d.district.trim()}
               </option>
             ))}
           </select>
@@ -1556,20 +1213,19 @@ const DevelopmentForm = () => {
           <label className="form-label">ප්‍රාදේශීය ලේකම් කොට්ඨාශය:</label>
           <select
             value={divisionalSec}
-            onChange={(e) => {
-              setDivisionalSec(e.target.value);
-              setGnDivision(""); // Reset gnDivision when DS changes
-            }}
+            onChange={handleDivisionalSecChange}
             className="form-control"
-            disabled={!district} // Disable if no district is selected
+            disabled={!district}
           >
-            <option value="">තෝරන්න</option>
-            {district &&
-              Object.keys(districtsAndDivisions[district]).map((ds) => (
-                <option key={ds} value={ds}>
-                  {ds}
-                </option>
-              ))}
+            <option value="">-- ප්‍රා. ලේ. කොට්ඨාශය තෝරන්න --</option>
+            {dsDivisions.map((ds) => (
+              <option
+                key={ds.ds_division_name.trim()}
+                value={ds.ds_division_name.trim()}
+              >
+                {ds.ds_division_name.trim()}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-group">
@@ -1578,15 +1234,17 @@ const DevelopmentForm = () => {
             value={gnDivision}
             onChange={(e) => setGnDivision(e.target.value)}
             className="form-control"
-            disabled={!divisionalSec || !districtsAndDivisions[district][divisionalSec]["ග්‍රාම නිලධාරී කොට්ඨාශය"]}
+            disabled={!divisionalSec}
           >
-            <option value="">තෝරන්න</option>
-            {divisionalSec && districtsAndDivisions[district][divisionalSec]["ග්‍රාම නිලධාරී කොට්ඨාශය"] &&
-              Object.entries(districtsAndDivisions[district][divisionalSec]["ග්‍රාම නිලධාරී කොට්ඨාශය"]).map(([code, name]) => (
-                <option key={code} value={name}>
-                  {name}
-                </option>
-              ))}
+            <option value="">-- ග්‍රා. නි. වසම තෝරන්න --</option>
+            {gnDivisions.map((gn, index) => (
+              <option
+                key={`${gn.gn_name.trim()}-${index}`}
+                value={gn.gn_name.trim()}
+              >
+                {gn.gn_name.trim()}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-group">
@@ -1598,7 +1256,6 @@ const DevelopmentForm = () => {
             className="form-control"
           />{" "}
         </div>
-
         {/* --- Dynamic Dropdown Selections --- */}
         <div className="form-group">
           {" "}
@@ -1625,7 +1282,9 @@ const DevelopmentForm = () => {
         {sector && getSubCategories().length > 0 && (
           <div className="form-group">
             {" "}
-            <label className="form-label">Select Sub-Category / උප කාණ්ඩය:</label>{" "}
+            <label className="form-label">
+              Select Sub-Category / උප කාණ්ඩය:
+            </label>{" "}
             <select
               value={subCategory}
               onChange={(e) => {
@@ -1644,61 +1303,73 @@ const DevelopmentForm = () => {
             </select>{" "}
           </div>
         )}
-        {subCategory && getSubSubCategories().length > 0 && !(sectors[sector][subCategory].isTable || sectors[sector][subCategory].problems) && (
-          <div className="form-group">
-            {" "}
-            <label className="form-label">Select Sub-Sub-Category / උප උප කාණ්ඩය:</label>{" "}
-            <select
-              value={subSubCategory}
-              onChange={(e) => {
-                setSubSubCategory(e.target.value);
-                resetSelections(3);
-              }}
-              className="form-control"
-            >
+        {subCategory &&
+          getSubSubCategories().length > 0 &&
+          !(
+            sectors[sector][subCategory].isTable ||
+            sectors[sector][subCategory].problems
+          ) && (
+            <div className="form-group">
               {" "}
-              <option value="">තෝරන්න</option>{" "}
-              {getSubSubCategories().map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}{" "}
-            </select>{" "}
-          </div>
-        )}
-        {subSubCategory && getSubSubSubCategories().length > 0 && !(sectors[sector][subCategory][subSubCategory].isTable || sectors[sector][subCategory][subSubCategory].problems) && (
-          <div className="form-group">
-            {" "}
-            <label className="form-label">
-              Select Sub-Sub-Sub-Category / උප උප උප කාණ්ඩය:
-            </label>{" "}
-            <select
-              value={subSubSubCategory}
-              onChange={(e) => {
-                setSubSubSubCategory(e.target.value);
-                resetSelections(4);
-              }}
-              className="form-control"
-            >
+              <label className="form-label">
+                Select Sub-Sub-Category / උප උප කාණ්ඩය:
+              </label>{" "}
+              <select
+                value={subSubCategory}
+                onChange={(e) => {
+                  setSubSubCategory(e.target.value);
+                  resetSelections(3);
+                }}
+                className="form-control"
+              >
+                {" "}
+                <option value="">තෝරන්න</option>{" "}
+                {getSubSubCategories().map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}{" "}
+              </select>{" "}
+            </div>
+          )}
+        {subSubCategory &&
+          getSubSubSubCategories().length > 0 &&
+          !(
+            sectors[sector][subCategory][subSubCategory].isTable ||
+            sectors[sector][subCategory][subSubCategory].problems
+          ) && (
+            <div className="form-group">
               {" "}
-              <option value="">තෝරන්න</option>{" "}
-              {getSubSubSubCategories().map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}{" "}
-            </select>{" "}
-          </div>
-        )}
-
+              <label className="form-label">
+                Select Sub-Sub-Sub-Category / උප උප උප කාණ්ඩය:
+              </label>{" "}
+              <select
+                value={subSubSubCategory}
+                onChange={(e) => {
+                  setSubSubSubCategory(e.target.value);
+                  resetSelections(4);
+                }}
+                className="form-control"
+              >
+                {" "}
+                <option value="">තෝරන්න</option>{" "}
+                {getSubSubSubCategories().map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}{" "}
+              </select>{" "}
+            </div>
+          )}
         {/* --- Dynamic Content Area --- */}
         {renderProblemInputs()}
         {renderTable()}
-
         {/* --- Proposals Section --- */}
         <div className="proposals-section">
           {" "}
-          <h3 className="section-title">සංවර්ධන යෝජනා (ප්‍රමුඛතාව අනුව)</h3>{" "}
+          <h3 className="section-title">
+            සංවර්ධන යෝජනා (ප්‍රමුඛතාව අනුව)
+          </h3>{" "}
           <div className="table-responsive">
             {" "}
             <table className="data-table">
@@ -1707,67 +1378,77 @@ const DevelopmentForm = () => {
                 {" "}
                 <tr>
                   {" "}
-                  <th>අංකය</th> <th>සංවර්ධන යෝජනාව</th> <th>අපේක්ෂිත දළ ඇස්තමේන්තුව (රු.)</th>{" "}
+                  <th>අංකය</th> <th>සංවර්ධන යෝජනාව</th>{" "}
+                  <th>අපේක්ෂිත දළ ඇස්තමේන්තුව (රු.)</th>{" "}
                   <th>වගකීම ආයතනය/නිලධාරියා</th> <th>Actions</th>{" "}
                 </tr>{" "}
-              </thead>
-              {" "}
+              </thead>{" "}
               <tbody>
                 {" "}
                 {proposals.map((prop, index) => (
                   <tr key={index}>
                     {" "}
-                    <td className="text-center">{index + 1}</td>
-                    {" "}
+                    <td className="text-center">{index + 1}</td>{" "}
                     <td>
                       <input
                         className="table-input"
                         value={prop.proposal}
-                        onChange={(e) => handleProposalChange(index, "proposal", e.target.value)}
+                        onChange={(e) =>
+                          handleProposalChange(
+                            index,
+                            "proposal",
+                            e.target.value
+                          )
+                        }
                         placeholder="සංවර්ධන යෝජනාව"
                       />
-                    </td>
-                    {" "}
+                    </td>{" "}
                     <td>
                       <input
                         type="number"
                         className="table-input"
                         value={prop.cost}
-                        onChange={(e) => handleProposalChange(index, "cost", e.target.value)}
+                        onChange={(e) =>
+                          handleProposalChange(index, "cost", e.target.value)
+                        }
                         placeholder="ඇස්තමේන්තුව (රු.)"
                       />
-                    </td>
-                    {" "}
+                    </td>{" "}
                     <td>
                       <input
                         className="table-input"
                         value={prop.agency}
-                        onChange={(e) => handleProposalChange(index, "agency", e.target.value)}
+                        onChange={(e) =>
+                          handleProposalChange(index, "agency", e.target.value)
+                        }
                         placeholder="වගකීම ආයතනය/නිලධාරියා"
                       />
-                    </td>
-                    {" "}
+                    </td>{" "}
                     <td className="text-center">
                       {" "}
                       {proposals.length > 1 && (
-                        <button type="button" onClick={() => deleteProposal(index)} className="btn btn-danger">
+                        <button
+                          type="button"
+                          onClick={() => deleteProposal(index)}
+                          className="btn btn-danger"
+                        >
                           Delete
                         </button>
                       )}{" "}
-                    </td>
-                    {" "}
+                    </td>{" "}
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-          {" "}
-          <button type="button" onClick={addProposal} className="btn btn-success btn-block">
+          </div>{" "}
+          <button
+            type="button"
+            onClick={addProposal}
+            className="btn btn-success btn-block"
+          >
             නව යෝජනාවක් එකතු කරන්න
           </button>
-        </div>
-
-        {" "}
+        </div>{" "}
         <button type="submit" className="btn btn-primary btn-block">
           ඉදිරිපත් කරන්න
         </button>
