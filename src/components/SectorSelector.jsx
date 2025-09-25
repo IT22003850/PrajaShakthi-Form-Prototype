@@ -69,6 +69,8 @@ const SectorSelector = ({
         getSubSubCategories().length > 0 &&
         !(
           sectors[sector][subCategory].isTable ||
+          sectors[sector][subCategory].isFixedRowTable ||
+            sectors[sector][subCategory].isHybridTable ||
           sectors[sector][subCategory].problems
         ) && (
           <div className="form-group">
@@ -96,6 +98,8 @@ const SectorSelector = ({
         getSubSubSubCategories().length > 0 &&
         !(
           sectors[sector][subCategory][subSubCategory].isTable ||
+          sectors[sector][subCategory][subSubCategory].isFixedRowTable ||
+            sectors[sector][subCategory][subSubCategory].isHybridTable ||
           sectors[sector][subCategory][subSubCategory].problems
         ) && (
           <div className="form-group">
